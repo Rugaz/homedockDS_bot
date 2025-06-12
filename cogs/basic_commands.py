@@ -1,48 +1,56 @@
 # cogs/basic_commands.py
 import discord
 from discord.ext import commands
+import datetime # Para registrar la hora del comando
 
-# Cada cog debe ser una clase que herede de commands.Cog
 class BasicCommands(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot # Necesitas una referencia al objeto bot
+        self.bot = bot
+        self.logging_cog = None # Para almacenar una referencia al LoggingCog
 
-    # Un evento on_ready específico para este cog
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Cog "{self.qualified_name}" cargado y listo.')
+        print(f'Cog "{self.qualified_name}" de Comandos Básicos cargado.')
+        # Una vez que el bot está listo y todos los cogs cargados, obtenemos el logging_cog
+        self.logging_cog = self.bot.get_cog("LoggingCog")
+        if self.logging_cog:
+            print("Log: BasicCommands tiene acceso a LoggingCog.")
+        else:
+            print("Log: ADVERTENCIA: BasicCommands NO pudo obtener LoggingCog.")
 
-    # Comando: !ping
-    # Los comandos dentro de un cog deben ser métodos de la clase y usar @commands.command()
+    @commands.Cog.listener()
+    async def on_command(self, ctx):
+        """
+        Este listener se dispara cada vez que un comando es invocado con éxito.
+        Loguea la ejecución de cualquier comando.
+        """
+        if self.logging_cog and self.logging_cog.log_channel:
+            try:
+                log_message = (
+                    f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
+                    f"Comando `!{ctx.command.name}` ejecutado por **{ctx.author.display_name}** (ID: {ctx.author.id}) "
+                    f"en `#{ctx.channel.name}` (ID: {ctx.channel.id})."
+                )
+                await self.logging_cog.log_channel.send(log_message)
+            except discord.Forbidden:
+                print(f"Log: ERROR: No tengo permisos para ESCRIBIR en el canal de logs ({self.logging_cog.log_channel.id}) desde on_command.")
+            except Exception as e:
+                print(f"Log: ERROR desconocido al loguear comando `!{ctx.command.name}` desde on_command: {e}")
+        else:
+            print(f"Log: No se pudo registrar el comando `!{ctx.command.name}`: Canal de logs no disponible o LoggingCog no accesible.")
+
     @commands.command(name='ping')
     async def ping(self, ctx):
-        """Responde con 'Pong!' y la latencia del bot."""
-        await ctx.send(f'Pong! Latencia: {round(self.bot.latency * 1000)}ms')
+        """Responde con Pong!"""
+        await ctx.send('Pong!')
+        # La lógica de registro de comandos ya se maneja en on_command,
+        # así que no necesitamos añadirla aquí.
 
-    # Comando: !saludar [miembro]
     @commands.command(name='saludar')
-    async def saludar(self, ctx, miembro: discord.Member = None):
-        """Saluda a un miembro específico o al autor del comando."""
-        if miembro:
-            await ctx.send(f'¡Saludos, {miembro.display_name}! ¡Bienvenido a Homedock!')
-        else:
-            await ctx.send(f'¡Hola, {ctx.author.display_name}! Estoy aquí para ayudarte.')
+    async def greet(self, ctx):
+        """Saluda al usuario."""
+        await ctx.send(f'¡Hola, {ctx.author.display_name}!')
+        # Este comando también será logueado automáticamente por on_command
 
-    # Si tienes eventos generales que no son comandos específicos de un cog,
-    # pueden ir aquí usando @commands.Cog.listener()
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.author == self.bot.user:
-            return
-
-        if message.content.lower() == 'hola':
-            await message.channel.send('¡Hola! Soy el bot de Homedock desde el cog de comandos básicos.')
-        
-        # OJO: No llames a process_commands aquí en un listener on_message dentro de un cog
-        # El bot principal ya lo hace. Si lo haces, los comandos se ejecutarán dos veces.
-        # Solo necesitas process_commands en el on_message general del bot principal si lo tienes.
-
-
-# Esta es la función de setup que discord.py busca para cargar el cog
 async def setup(bot):
     await bot.add_cog(BasicCommands(bot))
