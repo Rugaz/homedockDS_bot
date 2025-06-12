@@ -7,7 +7,7 @@ import asyncio
 # --- CONFIGURACIÓN DE IDS ---
 REACTION_CHANNEL_ID = 1382490687391400057
 # ¡IMPORTANTE! Para que el bot genere un nuevo mensaje, esta línea DEBE ser:
-REACTION_MESSAGE_ID = None 
+REACTION_MESSAGE_ID = 1382654357127954453 
 # Si el bot ya ha generado un mensaje y tienes su ID, actualízala aquí para que el bot lo use.
 # Por ejemplo: REACTION_MESSAGE_ID = 1382528541052112899
 
