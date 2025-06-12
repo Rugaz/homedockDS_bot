@@ -1,7 +1,7 @@
 # cogs/basic_commands.py
 import discord
 from discord.ext import commands
-import datetime # Para registrar la hora del comando
+import datetime
 
 class BasicCommands(commands.Cog):
     def __init__(self, bot):
@@ -10,8 +10,10 @@ class BasicCommands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Cog "{self.qualified_name}" de Comandos Básicos cargado.')
+        print(f'Cog "{self.qualified_name}" de Comandos Básicos cargado y listo.')
         # Una vez que el bot está listo y todos los cogs cargados, obtenemos el logging_cog
+        # Usamos self.bot.loop.create_task para no bloquear on_ready si LoggingCog tarda en inicializarse completamente.
+        # aunque get_cog es sincrónico y rápido.
         self.logging_cog = self.bot.get_cog("LoggingCog")
         if self.logging_cog:
             print("Log: BasicCommands tiene acceso a LoggingCog.")
@@ -22,7 +24,7 @@ class BasicCommands(commands.Cog):
     async def on_command(self, ctx):
         """
         Este listener se dispara cada vez que un comando es invocado con éxito.
-        Loguea la ejecución de cualquier comando.
+        Loguea la ejecución de cualquier comando en el canal de logs.
         """
         if self.logging_cog and self.logging_cog.log_channel:
             try:
@@ -43,14 +45,11 @@ class BasicCommands(commands.Cog):
     async def ping(self, ctx):
         """Responde con Pong!"""
         await ctx.send('Pong!')
-        # La lógica de registro de comandos ya se maneja en on_command,
-        # así que no necesitamos añadirla aquí.
 
     @commands.command(name='saludar')
     async def greet(self, ctx):
         """Saluda al usuario."""
         await ctx.send(f'¡Hola, {ctx.author.display_name}!')
-        # Este comando también será logueado automáticamente por on_command
 
 async def setup(bot):
     await bot.add_cog(BasicCommands(bot))
