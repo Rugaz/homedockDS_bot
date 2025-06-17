@@ -17,7 +17,7 @@ SUPPORT_CHANNELS = {
     1382486478118060142: "AI Support",      # support ia
     1382045233268789268: "Media Support",    # support media
     1382046270310453349: "Networking Support", # support networking
-    1382456916134485750: "Dev Tools Support", # support dev tools (Corrected ID if typo was present, check this one)
+    1382456916134985750: "Dev Tools Support", # support dev tools (Corrected ID if typo was present, check this one)
     1382486039012180010: "Files & Productivity Support", # support files productivity
     1382486278917853264: "Home Automation Support", # support home automation
     1382486837154807891: "Social Support"    # support social
